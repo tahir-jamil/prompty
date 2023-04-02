@@ -2,69 +2,60 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 const Options = () => {
-  const [color, setColor] = useState<string>("");
-  const [status, setStatus] = useState<string>("");
-  const [like, setLike] = useState<boolean>(false);
+  const [prompts, setPrompts] = useState<string[]>([]);
 
+  const [content, setContent] = useState("Default content");
+
+  const handleItemClick = (newContent: any) => {
+    setContent(newContent);
+  };
   useEffect(() => {
-    // Restores select box and checkbox state using the preferences
-    // stored in chrome.storage.
-    chrome.storage.sync.get(
-      {
-        favoriteColor: "red",
-        likesColor: true,
-      },
-      (items) => {
-        setColor(items.favoriteColor);
-        setLike(items.likesColor);
+    // Restores the prompts list using the preferences stored in chrome.storage.
+
+    chrome.storage.sync.get("prompts", (data) => {
+      if (!data.prompts) {
+        const prompts = [
+          "What's your name?",
+          "What's your favorite color?",
+          "What do you like to do for fun?",
+          "Tell me about your job.",
+          "What's your favorite book or movie?",
+          "Do you have any pets?",
+          "Where's your favorite place to travel?",
+          "What's your favorite food?",
+          "Tell me about your family.",
+          "What's something interesting about you?",
+        ];
+        chrome.storage.sync.set({ prompts: prompts });
+        setPrompts(prompts);
+      } else {
+        setPrompts(data.prompts);
       }
-    );
+    });
   }, []);
 
-  const saveOptions = () => {
-    // Saves options to chrome.storage.sync.
-    chrome.storage.sync.set(
-      {
-        favoriteColor: color,
-        likesColor: like,
-      },
-      () => {
-        // Update status to let user know options were saved.
-        setStatus("Options saved.");
-        const id = setTimeout(() => {
-          setStatus("");
-        }, 1000);
-        return () => clearTimeout(id);
-      }
-    );
-  };
-
   return (
-    <>
-      <div>
-        Favorite color: <select
-          value={color}
-          onChange={(event) => setColor(event.target.value)}
-        >
-          <option value="red">red</option>
-          <option value="green">green</option>
-          <option value="blue">blue</option>
-          <option value="yellow">yellow</option>
-        </select>
+    <div className="flex flex-row">
+      <div className="bg-gray-700 w-1/6 min-h-screen">
+        <div className="p-4 text-white font-bold">Menu</div>
+        <ul className="p-2 text-white">
+          <li
+            className="my-2 hover:bg-gray-600 rounded-md p-2 cursor-pointer"
+            onClick={() => handleItemClick("New Prompt content")}
+          >
+            New Prompt
+          </li>
+          <li
+            className="my-2 hover:bg-gray-600 rounded-md p-2 cursor-pointer"
+            onClick={() => handleItemClick("Public Prompts content")}
+          >
+            Public Prompts
+          </li>
+        </ul>
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            checked={like}
-            onChange={(event) => setLike(event.target.checked)}
-          />
-          I like colors.
-        </label>
-      </div>
-      <div>{status}</div>
-      <button onClick={saveOptions}>Save</button>
-    </>
+      <div className="flex-1 bg-gray-200 p-4">{content}</div>
+    </div>
+
   );
 };
 
@@ -72,6 +63,26 @@ const root = createRoot(document.getElementById("root")!);
 
 root.render(
   <React.StrictMode>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.17/tailwind.min.css"
+    />
     <Options />
   </React.StrictMode>
 );
+
+{/* <li className="my-2 hover:bg-gray-600 rounded-md p-2 cursor-pointer">
+          Curated Prompts
+        </li> */}
+{/* <li className="my-2 hover:bg-gray-600 rounded-md p-2 cursor-pointer">
+          Light Mode
+        </li>
+        <li className="my-2 hover:bg-gray-600 rounded-md p-2 cursor-pointer">
+          History
+        </li>
+        <li className="my-2 hover:bg-gray-600 rounded-md p-2 cursor-pointer">
+          Settings
+        </li>
+        <li className="my-2 hover:bg-gray-600 rounded-md p-2 cursor-pointer">
+          Storage
+        </li> */}
